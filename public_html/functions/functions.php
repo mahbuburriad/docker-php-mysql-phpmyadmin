@@ -1,5 +1,5 @@
 <?php
-$db = mysqli_connect("mysql", "wordpress", "wordpress", "new_shopcart");
+$db = mysqli_connect("mysql", "someuser", "somepassword", "new_shopcart");
 
 function getProducts(){
     global $db;

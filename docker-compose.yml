@@ -1,67 +1,68 @@
 version: "3.2"
 services:
-  php:
-    build: 
-      context: './php/'
+  php: #php service for run php code
+    container_name: php #container name
+    build: #build the Dockerfile
+      context: './php/' #select the folder where Dockerfile located
       args:
-       PHP_VERSION: 7.0
+       PHP_VERSION: 7.0 #select php version
     networks:
-      - backend
+      - backend #working network
     volumes:
-      - ./public_html/:/var/www/html/
-    container_name: php
+      - ./public_html/:/var/www/html/ #copy source code public_html to /var/www/html/ folder
     ports:
-      - "8004:80"
-      
+      - "8004:80" #map the port to 8004 instead of using default port
+    restart: always #everytime start automatically when run
+
   apache:
-    build:
-      context: './apache/'
+    build: #build the Dockerfile
+      context: './apache/' #select the folder where Dockerfile located
       args:
-       APACHE_VERSION: 7.0
+       APACHE_VERSION: 7.0 #select apache version
     depends_on:
-      - php
-      - mysql
-    networks:
-      - frontend
+      - php #link with php container
+      - mysql #link with mysql container
+    networks: #working network
+      - frontend 
       - backend
-    ports:
-      - "8001:80"
+    ports: 
+      - "8001:80" #map the port to 8001 instead of using default port
     volumes:
-      - ./public_html/:/var/www/html/
-    container_name: apache
+      - ./public_html/:/var/www/html/ #copy source code public_html to /var/www/html/ folder
+    container_name: apache #container name
+    restart: always #everytime start automatically when run
 
   phpmyadmin:
-    container_name: shopcart_phpmyadmin
-    depends_on:
+    container_name: phpmyadmin_mysql #container name
+    depends_on: #link with mysql container
       - mysql
-    image: phpmyadmin/phpmyadmin
-    restart: always
+    image: phpmyadmin/phpmyadmin #phpmyadmin image select to pull and run
+    restart: always #everytime start automatically when run
     ports:
-      - "8002:80"
+      - "8002:80" #map the port to 8002 instead of using default port
     environment:
-      PMA_HOST: mysql
-      MYSQL_ROOT_PASSWORD: root
-    networks:
+      PMA_HOST: mysql #select the db host container name
+      MYSQL_ROOT_PASSWORD: root #nysql root password should same with mysql container root password
+    networks: #working network
       - frontend
       - backend  
 
   mysql:
-    image: mysql:5.7
+    image: mysql:5.7 #
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
-      - "8003:3306"
+      - "8003:3306" #map the port to 8003 instead of using default port
     volumes:
-      - ./public_html/Database:/docker-entrypoint-initdb.d
+      - ./public_html/Database:/docker-entrypoint-initdb.d #copy the .sql file from public_html to docker mysql engine
     networks:
       - backend
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: new_shopcart
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
-    container_name: mysql
+      MYSQL_ROOT_PASSWORD: root #mysql entrypoint root password
+      MYSQL_DATABASE: new_shopcart #database name
+      MYSQL_USER: someuser #database username
+      MYSQL_PASSWORD: somepassword #database password
+    container_name: mysql #container name
 networks:
   frontend:
   backend:
-
