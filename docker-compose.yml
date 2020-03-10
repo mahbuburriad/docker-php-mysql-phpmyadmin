@@ -1,0 +1,67 @@
+version: "3.2"
+services:
+  php:
+    build: 
+      context: './php/'
+      args:
+       PHP_VERSION: 7.0
+    networks:
+      - backend
+    volumes:
+      - ./public_html/:/var/www/html/
+    container_name: php
+    ports:
+      - "8004:80"
+      
+  apache:
+    build:
+      context: './apache/'
+      args:
+       APACHE_VERSION: 7.0
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "8001:80"
+    volumes:
+      - ./public_html/:/var/www/html/
+    container_name: apache
+
+  phpmyadmin:
+    container_name: shopcart_phpmyadmin
+    depends_on:
+      - mysql
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8002:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - frontend
+      - backend  
+
+  mysql:
+    image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "8003:3306"
+    volumes:
+      - ./public_html/Database:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: new_shopcart
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    container_name: mysql
+networks:
+  frontend:
+  backend:
+
